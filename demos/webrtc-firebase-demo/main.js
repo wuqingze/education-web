@@ -3,6 +3,7 @@ import './style.css';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 
+console.log("--------------------------test");
 const firebaseConfig = {
   // your config
 };
