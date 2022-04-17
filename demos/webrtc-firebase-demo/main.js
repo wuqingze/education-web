@@ -4,6 +4,7 @@ import firebase from 'firebase/app';
 import 'firebase/firestore';
 
 console.log("--------------------------test");
+console.log("--------------------------test1");
 const firebaseConfig = {
   // your config
 };
