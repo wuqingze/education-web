@@ -3,16 +3,16 @@ import './style.css';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "AIzaSyBantQ6liA691afYdRIOuvavwl36WnKBOA",
-    authDomain: "education-web-960c6.firebaseapp.com",
-    projectId: "education-web-960c6",
-    storageBucket: "education-web-960c6.appspot.com",
-    messagingSenderId: "454856807902",
-    appId: "1:454856807902:web:6106e2878a1781a8cd794f",
-    measurementId: "G-M2K9V6H7C3"
+  apiKey: "AIzaSyBantQ6liA691afYdRIOuvavwl36WnKBOA",
+  authDomain: "education-web-960c6.firebaseapp.com",
+  projectId: "education-web-960c6",
+  storageBucket: "education-web-960c6.appspot.com",
+  messagingSenderId: "454856807902",
+  appId: "1:454856807902:web:6106e2878a1781a8cd794f",
+  measurementId: "G-M2K9V6H7C3"
 };
-
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
@@ -31,7 +31,7 @@ const servers = {
 const pc = new RTCPeerConnection(servers);
 let localStream = null;
 let remoteStream = null;
-
+let cnt = 0;
 // HTML elements
 const webcamButton = document.getElementById('webcamButton');
 const webcamVideo = document.getElementById('webcamVideo');
@@ -45,7 +45,6 @@ const hangupButton = document.getElementById('hangupButton');
 
 webcamButton.onclick = async () => {
   localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-console.log("aldfj");
   remoteStream = new MediaStream();
 
   // Push tracks from local stream to peer connection
@@ -56,10 +55,20 @@ console.log("aldfj");
   // Pull tracks from remote stream, add to video stream
   pc.ontrack = (event) => {
     event.streams[0].getTracks().forEach((track) => {
-      remoteStream.addTrack(track);
+        console.log("remoteStream add strack");
+        if(cnt<2){
+            remoteStream.addTrack(track);
+            cnt += 1;
+            console.log(track);
+        }
     });
   };
 
+    /**
+    localStream.getTracks().forEach((track) => {
+        remoteStream.addTrack(track);
+    });
+  **/
   webcamVideo.srcObject = localStream;
   remoteVideo.srcObject = remoteStream;
 
@@ -91,13 +100,14 @@ callButton.onclick = async () => {
     type: offerDescription.type,
   };
 
+    console.log("before set offer");
   await callDoc.set({ offer });
-
+    console.log("after set offer");
   // Listen for remote answer
   callDoc.onSnapshot((snapshot) => {
     const data = snapshot.data();
     if (!pc.currentRemoteDescription && data?.answer) {
-      console.log("Listen for remote answer");
+        console.log("calldoc Listen for remote answer...");
       const answerDescription = new RTCSessionDescription(data.answer);
       pc.setRemoteDescription(answerDescription);
     }
@@ -107,6 +117,7 @@ callButton.onclick = async () => {
   answerCandidates.onSnapshot((snapshot) => {
     snapshot.docChanges().forEach((change) => {
       if (change.type === 'added') {
+        console.log("When answered, add candidate to peer connection");
         const candidate = new RTCIceCandidate(change.doc.data());
         pc.addIceCandidate(candidate);
       }
@@ -140,7 +151,9 @@ answerButton.onclick = async () => {
     sdp: answerDescription.sdp,
   };
 
+    console.log("before update answer");
   await callDoc.update({ answer });
+    console.log("after update answer");
 
   offerCandidates.onSnapshot((snapshot) => {
     snapshot.docChanges().forEach((change) => {
@@ -152,3 +165,4 @@ answerButton.onclick = async () => {
     });
   });
 };
+
