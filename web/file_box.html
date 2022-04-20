@@ -1,0 +1,68 @@
+<div >
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <div class="row">
+                <div class="col-md-4" ng-repeat="file in search_file" ng-hide="search_file.length == 0">
+                    <div class="thumbnail">
+                        <img alt="300x200" src="{{file['image']}}" />
+                        <div class="caption">
+                            <h3>
+                                {{file['headline']}}
+                            </h3>
+                            <p>
+                                {{file['introduction']}}
+                            </p><br>
+                            <div ng-hide="file['labels'].length == 0">
+                                <span ng-repeat="label in file['labels']" class="badge pull-right">{{label}}</span>
+                            </div><br>
+                            <p>
+                                <div class="row clearfix">
+                                    <div class="col-md-3 column"></div>
+                                    <div class="col-md-3 column">
+                                            <a class="btn btn-default" href="#" ng-click="modify_image(file['image'])">编辑</a>
+                                    </div>
+                                    <div class="col-md-3 column">
+                                            <a class="btn btn-primary" href="#">call friend</a>
+                                    </div>
+                                    <div class="col-md-3 column">
+                                            <a class="btn btn-danger" href="#" ng-click="delete_file_bin()">删除</a>
+                                    </div>
+                                </div>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4" ng-repeat="file in lasted_file" ng-hide="search_file.length != 0" ng-show="show_this" ng-init="show_this = true">
+                    <div class="thumbnail">
+                        <img alt="300x200" src="{{file['image']}}" id="{{file['image']}}"/>
+                        <div class="caption">
+                            <h3>
+                                {{file['headline']}}
+                            </h3>
+                            <p>
+                                {{file['introduction']}}
+                            </p><br>
+                            <div ng-hide="file['labels'].length == 0">
+                                <span ng-repeat="label in file['labels']" class="badge pull-right">{{label}}</span>
+                            </div><br>
+                            <p>
+                                <div class="row clearfix">
+                                    <div class="col-md-3 column"></div>
+                                    <div class="col-md-3 column">
+                                            <a class="btn btn-default" href="#" ng-click="modify_image(file['image'])">编辑</a>
+                                    </div>
+                                    <div class="col-md-3 column">
+                                            <a class="btn btn-primary" href="#" ng-click="search_friend(file['image'])"  data-toggle="modal" data-target="#call_friend_model">call friend</a>
+                                    </div>
+                                    <div class="col-md-3 column">
+                                            <a class="btn btn-danger" href="#" ng-click="delete_file_bin(file['image']);">删除</a>
+                                    </div>
+                                </div>
+                            </p>
+                        </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

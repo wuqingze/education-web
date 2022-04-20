@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>WebRTC</title>
+        <link rel="stylesheet" href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src="../js/angular.min.js"></script>
+        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+        <style type="text/css">
+            body{height:100%;}
+            a:link, a:visited{color:#333;text-decoration:none;}
+            .con1,.con2{position:relative;border:#ccc solid 1px;width:400px;height:400px;float:left;margin-right:5px;}
+            .con1{width:990px;height:500px;}
+            .handler1, .handler2{width:40px;height:400px;border:#ccc solid 1px;float:left;margin-right:25px;}
+            .handler1 a, .handler2 a{border-bottom:#ccc solid 1px;height:30px;line-height:30px;font-size:12px;display: block;text-align:center;}
+            .handler1 a.active, .handler2 a.active{background:#ddd;}
+            input{width:30px;}
+            .handler1 span, .handler2 span{width:10px;height:10px;margin:1px;display:block;border:#fff solid 1px;}
+            .handler1 span.active, .handler2 span.active{width:10px;height:10px;margin:1px;display:block;border-color:red;}
+    
+            video {
+            object-fit:fill;
+            width: 300px;
+            height: 200px;
+            }
+        </style>
+    </head>
+    <body ng-app="shouye_app">
+        <!-- <button onclick="sendcookie()">send cookie</button> -->
+        <div ng-include="'navigator.html'" id="navigator_div" ></div> 
+        <div ng-controller="main_controller">
+            <div class="tabbable" id="tabs-752432" ng-show="main_show">
+                <ul class="nav nav-tabs">
+                    <li class="active">
+                            <a href="#new_file" data-toggle="tab">新建文件</a>
+                    </li>
+                    <li>
+                            <a href="#add_friend" data-toggle="tab">加好友</a>
+                    </li>
+                    <li>
+                        <a href="#personal_file" data-toggle="tab">个人文件</a>
+                    </li>
+                    <li>
+                        <a href="#cooperation_file" data-toggle="tab">协作文件</a>
+                    </li>
+                    <li >
+                        <a href="#bin" data-toggle="tab">回收站</a>
+                    </li>
+                </ul>
+                
+                <div class="tab-content">
+                    <div class="tab-pane active" id="new_file" ng-include="'new_file.html'">
+                    </div>
+                    <div class="tab-pane" id="add_friend" ng-include="'add_friend.html'">
+                    </div>
+                    <div class="tab-pane" id="personal_file" ng-include="'personal_file.html'">
+                    </div>
+                    <div class="tab-pane" id="cooperation_file" ng-include="'cooperation_file.html'">
+                    </div>
+                    <div class="tab-pane" id="bin" ng-include="'bin.html'">
+                    </div>
+                </div>
+            </div>  
+            <div ng-show="temp_panel_show">
+                <a href="" class="glyphicon glyphicon-arrow-left btn btn-default" ng-click="return_main_panel()">返回</a>
+                <drawcanvas ng-repeat="canvas in temp_canvas"></drawcanvas>
+            </div>
+        </div>
+        <callfriend ng-controller="call_friend_controller"></callfriend>
+    </body>
+    <script src="../js/chosen_panel_element_add_event_listener.js"></script>
+    <script src="../js/file_to_string.js"></script>
+    <script src="../js/canvas.js"></script>
+    <script src="/socket.io/socket.io.js"></script> 
+    <script src="../js/my_angular.js"></script>
+    
+    <script>
+        // function sendcookie(){
+        //     var socket = io.connect();        
+        //     socket.emit("test_cookie",{'cookie':document.cookie});
+        // }
+        var socket = io.connect(); 
+        load_angular();
+    </script>
+    
+</html>
