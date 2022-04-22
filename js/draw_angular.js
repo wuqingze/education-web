@@ -287,6 +287,8 @@ function init_video(scope){
     var localVideo = document.querySelector('#localVideo');
     var remoteVideo = document.querySelector('#remoteVideo');
     
+//    localStream = navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+//    localVideo.srcObject = (MediaStream)localStream;
     navigator.mediaDevices.getUserMedia({
       audio: false,
       video: true
@@ -295,10 +297,11 @@ function init_video(scope){
     .catch(function(e) {
       alert('getUserMedia() error: ' + e.name);
     });
-    
     function gotStream(stream) {
       console.log('Adding local stream.');
-      localVideo.src = window.URL.createObjectURL(stream);
+//      localVideo.src = window.URL.createObjectURL(stream);
+        localVideo.srcObject = stream;
+        localVideo.play();
       localStream = stream;
       sendMessage('got user media');
       if (isInitiator) {
