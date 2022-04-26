@@ -14,6 +14,8 @@
                         <a class="clear" href="javascript:;">清除</a>
                         <a class="save" href="javascript:;" ng-click="save_canvas_file()" data-toggle="modal" data-target="#save_file_model">保存</a>
                         <a ng-click="only_video()" ng-show="drawhtml">全屏</a>
+                        <a ng-click="hide_video()" ng-show="drawhtml" id="hidevideolink">隐藏</a>
+                        <a ng-click="return_main_page()" ng-show="drawhtml" >返回</a>
                         <input class="lineWidth" value="1" autocomplete="off" />
                         <span style="background: red;"></span>
                         <span style="background: green;"></span>
@@ -22,7 +24,7 @@
                 </div>	
             </div>
             <div class="col-md-11 column">
-                <div class="con1" style="margin:0px 0px 0px -40px"></div>
+                <div class="con1" style="margin:0px 0px 0px -30px"></div>
             </div>
         </div>
     </div>

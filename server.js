@@ -49,9 +49,8 @@ var connectCounter = 0;
 var tempimage = "";
 var messages = {};
 var connection_pair = {};
+var isvideoready = false;
 
-// numClients
-// io.sockets.on("connection", function(socket){
   io.on("connection", function(socket){
     connectCounter ++;
     console.log("connected user count",connectCounter);
@@ -86,7 +85,7 @@ var connection_pair = {};
       var user = login_user[cookie];
       var connection = mysqlconnection();
       var querysql = "select * from personal_file where email='"+user+"'";
-        console.log("personal file ======"+querysql);
+      console.log("personal file ======"+querysql);
       connection.query(querysql, function(err, rows, fields) {
         socket.emit("personal_file",rows);
         connection.end();
@@ -94,8 +93,11 @@ var connection_pair = {};
     });
 
     socket.on("cooperation_file", function(msg){
+
+      var cookie = msg['cookie'].split(';')[0];
+      var user = login_user[cookie];
       var connection = mysqlconnection();
-      var querysql = "select * from cooperation_file where email='nongxiaolang@foxmail.com'";
+      var querysql = "select * from cooperation_file where email='"+user+"'";
       connection.query(querysql, function(err, rows, fields) {
         socket.emit("cooperation_file",rows);
         connection.end();
@@ -126,10 +128,56 @@ var connection_pair = {};
       var user = login_user[cookie];
       var querysql = "select * from user where email in (select friend_email from friend where email='"+user+"')";
       var connection = mysqlconnection();
-      console.log("msg['cookie']",msg['cookie'].split(";")[0]);
-      console.log('friend file cookie', cookie, login_user[cookie]);
       connection.query(querysql, function(err, rows, fields) {
         socket.emit("friend_file",rows);
+        connection.end();
+      });
+    });
+
+    socket.on("stranger", function(msg){
+      var cookie = msg['cookie'].split(';')[0];
+      var user = login_user[cookie];
+      var querysql = "select * from user where email not in (select friend_email from friend where email='"+user+"')"+" and email != '"+user+"'";
+      var connection = mysqlconnection();
+      connection.query(querysql, function(err, rows, fields) {
+        socket.emit("stranger",rows);
+        connection.end();
+      });
+    });
+
+    socket.on("addfriend", function(msg){
+      console.log("addfrind");
+      var cookie = msg['cookie'].split(';')[0];
+      var user = login_user[cookie];
+      var querysql = "se";
+      console.log("add friend "+querysql);
+      var connection = mysqlconnection();
+      connection.query(querysql, function(err, rows, fields) {
+        if(err){
+          console.log(err);
+          socket.emit("addfriend",{"result":false});
+        }else{
+          querysql = "insert into friend(email, friend_email) value('"+msg['email']+"','"+user+"');"
+          connection.query(querysql, function(err, rows, fields) {
+            if(err){
+              console.log(err);
+              socket.emit("addfriend",{"result":false});
+            }else{
+              socket.emit("addfriend",{"result":true});
+            }
+          });
+        }
+        connection.end();
+      });
+    });
+
+    socket.on("friends", function(msg){
+      var cookie = msg['cookie'].split(';')[0];
+      var user = login_user[cookie];
+      var querysql = "select * from user where email in (select friend_email from friend where email='"+user+"')";
+      var connection = mysqlconnection();
+      connection.query(querysql, function(err, rows, fields) {
+        socket.emit("friends",rows);
         connection.end();
       });
     });
@@ -334,13 +382,6 @@ var connection_pair = {};
         }
       });
       connection.end();
-      // console.log("search_friend");
-      // var friends = [];
-      // var i0 =  parseInt(Math.random()*10);
-      // for(var i=0; i<i0; i++){
-      //   friends.push(i);
-      // }
-      // socket.emit("search_friend", {"result":true, "friends": friends});
     });
 
     socket.on("messages", function(msg){
@@ -369,14 +410,6 @@ var connection_pair = {};
 
       var connection = mysqlconnection();
       var querysql1 = "insert into cooperation_file(cooperation_file_id,email,friend_email,image,headline,introduction,labels) value(?,?,?,?,?,?,?)";
-      // connection.query(querysql,[msg['email']+msg['friend_email']+Math.random().toString(),msg['email'],msg['friend_email'],msg['image'],msg['headline'],msg['introduction'],msg['labels']], function(err,result){
-      //   if(err){
-      //     socket.emit("save_cooperation_file",{'result':false});
-      //   }else{
-      //     socket.emit("save_cooperation_file",{"result":true});
-      //   }
-      // });
-
       var imgData = msg['imgData'];
       var base64Data = imgData.replace(/^data:image\/\w+;base64,/, "");
       var dataBuffer = new Buffer(base64Data, 'base64');
@@ -398,41 +431,40 @@ var connection_pair = {};
           var headline = msg['headline'];
           var introduction = msg['introduction'];
           var labels = msg['labels'];
-          console.log("cooperation_file_id",email+(count+1).toString());
-          console.log("email",email);
-          console.log("friend_email", friend_email);
-          console.log("image",imagepath);
-          console.log("introduction",introduction);
-          console.log("labels",labels);
-          console.log("headline",headline);
+          var dir = "images/"+email+"/cooperation_file";
+          if (!fs.existsSync(dir)){
+                 fs.mkdirSync(dir, { recursive: true });
+          }
+
           connection.query(querysql1,[email+(count+1).toString(), email,friend_email, "../"+imagepath, headline, introduction, labels], function(err, result){
-            if(err){
-              console.log("insert cooperation file to database failed");
-              socket.emit("save_cooperation_file",{"result":false});
-            }else{
-              fs.writeFile(imagepath, dataBuffer, function(err) {
                 if(err){
-                  console.log("insert into cooperation failed");
+                  console.log("insert cooperation file failed "+err);
                   socket.emit("save_cooperation_file",{"result":false});
                 }else{
-                  console.log("insert into cooperation file successu");
-                  socket.emit("save_cooperation_file",{"result":true});
-                  console.log("save successfully");
-                }
-              });
-            }
+                  fs.writeFile(imagepath, dataBuffer, function(err) {
+                    if(err){
+                      console.log("write cooperation failed " + err);
+                      socket.emit("save_cooperation_file",{"result":false});
+                    }else{
+                      console.log("insert into cooperation file successu");
+                      socket.emit("save_cooperation_file",{"result":true});
+                      console.log("save successfully");
+                    }
+                  });
+               }
+            connection.end();
           });
         }
       });
-      // connection.end();
     });
-    // socket.on("test_cookie", function(msg){
-    //   console.log(msg);
-    //   console.log(msg['cookie']);
-    //   console.log(login_user);
-    //   console.log(login_user[msg['cookie'].split(";")[0].trim()]);
-    // });
 
+    socket.on("isvideoready", function(msg){
+        socket.emit("isvideoready",{"result":isvideoready});
+    });
+
+    socket.on("answer", function(msg){
+      isvideoready = true;
+    });
 
     // convenience function to log server messages on the client
     function log() {
@@ -446,22 +478,16 @@ var connection_pair = {};
         // for a real app, would be room-only (not broadcast)
         socket.broadcast.emit('message', message);
       });
-
-
+/**
       socket.on('create or join', function(room) {
-        log('Received request to create or join room ' + room);
-
-        // var numClients = io.sockets.sockets.length;
-        var numClients = io.sockets.length;
-        log('Room ' + room + ' now has ' + connectCounter + ' client(s)');
-
+        console.log('Received request to create or join room ' + room);
         if (connectCounter === 1) {
           socket.join(room);
-          log('Client ID ' + socket.id + ' created room ' + room);
+          console.log('Client ID ' + socket.id + ' created room ' + room);
           socket.emit('created', room, socket.id);
 
         } else if (connectCounter < 10) {
-          log('Client ID ' + socket.id + ' joined room ' + room);
+          console.log('Client ID ' + socket.id + ' joined room ' + room);
           io.sockets.in(room).emit('join', room);
           socket.join(room);
           socket.emit('joined', room, socket.id);
@@ -470,7 +496,7 @@ var connection_pair = {};
           socket.emit('full', room);
         }
       });
-
+**/
       socket.on('ipaddr', function() {
         var ifaces = os.networkInterfaces();
         for (var dev in ifaces) {
@@ -490,6 +516,15 @@ var connection_pair = {};
         connectCounter--;
         console.log("disconnected",connectCounter);
         });
+
+      socket.on('return_main_page', function(msg) {
+          var cookie = msg['cookie'].split(';')[0];
+          var user = login_user[cookie];
+          messages[user] = null;
+          isvideoready = false;
+          socket.emit("return_main_page", {"result":true});
+      });
+
     }); 
 
   http.listen(8080, function(){

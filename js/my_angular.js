@@ -1,9 +1,6 @@
-
 var not_active = 'list-group-item';
 var active = 'list-group-item active';
 var tempimage = '';
-
-
 
 function all_hide_true(scope){
     scope.empty_panel_hide = true;
@@ -160,9 +157,6 @@ function load_angular(){
             
         };
 
-        $scope.save_canvas_file = function(){
-            
-        }
     });
 
     app.controller('navigator_controller', function($scope, $http) {
@@ -192,46 +186,69 @@ function load_angular(){
     });
     
     app.controller('add_friend_controller', function($http,$scope){
-        socket.on("friend_file", function(msg){
+        socket.on("stranger", function(msg){
             console.log('friend message',msg);
             $scope.lasted_friend = msg;    
             $scope.$apply();
         });
-        socket.emit("friend_file", {"cookie":document.cookie});
 
-        // $scope.lasted_friend = [{'name':'wu','qianming':'be honest','profile':'../images/u_01.png'},
-        //     {'name':'qing','qianming':'be honest','profile':'../images/u_02.png'},
-        //     {'name':'ze','qianming':'be honest','profile':'../images/u_03.png'}];
-       
+        socket.on("addfriend", function(msg){
+            if(msg['result'] == true){
+                alert("添加好友成功！");
+            }else{
+                alert("添加好友失败！");
+            }
+        });
+
         $scope.search_friend = [];
         console.log("add_friend_constroller");
         $scope.$watch('search_value', function(newValue,oldValue){
             if (newValue === oldValue) {
                 return;
            }else if((newValue.length==1 && oldValue==undefined) || (newValue.length > oldValue.length)){
-               $scope.search_friend.push({'name':'ze','qianming':'be honest','profile':'../images/u_03.png'});
+                socket.emit("stranger", {"cookie":document.cookie});
            }else{
-               $scope.search_friend.pop()
+               $scope.lasted_friend.pop()
            }
         },true);
 
+        $scope.addfriend = function(email){
+            socket.emit("addfriend", {"cookie":document.cookie, "email":email});
+        };
+
+        $scope.todraw = function(){
+            alert("fdalsjf");
+            //href="/web/draw.html"
+        };
+        $scope.todraw = function(){
+            alert("to draw");
+            $scope.messages = false;
+        }
+
+    });
+
+    app.controller('friend_list_controller', function($http,$scope){
+        socket.on("friends", function(msg){
+            console.log('friend message',msg);
+            $scope.lasted_friend = msg;    
+            $scope.$apply();
+        });
+        socket.emit("friends", {"cookie":document.cookie});
+
+        socket.on("deletefriend", function(msg){
+            if(msg['result'] == true){
+                alert("删除好友成功！");
+            }else{
+                alert("删除好友失败！");
+            }
+        });
+
+        $scope.addfriend = function(email){
+            socket.emit("deletefriend", {"cookie":document.cookie, "email":email});
+        };
     });
 
     app.controller('personal_file_controller', function($http,$scope){
-        // $scope.lasted_personal_file = [{"h":"老年","p":"架飞机阿咖酚散放辣椒发了卡机发","img":"../images/1.png"},
-        //                                {"h":"老年","p":"架飞机阿咖酚散放辣椒发了卡机发","img":"../images/2.png"},
-        //                                {"h":"老年","p":"架飞机阿咖酚散放辣椒发了卡机发","img":"../images/3.png"}];
-
-        // $scope.search_file = [];
-        // $scope.$watch('search_value', function(newValue, oldValue) {
-        //     if (newValue === oldValue) {
-        //         return;
-        //     }else if((newValue.length==1 && oldValue==undefined) || (newValue.length > oldValue.length)){
-        //         $scope.search_file.push({"h":"老年","p":"架飞机阿咖酚散放辣椒发了卡机发","img":"../images/1.png"});
-        //     }else{
-        //         $scope.search_file.pop()
-        //     }
-        // }, true);
         $scope.lasted_file = [];
         $scope.labels = [1,2,3,4];
         $scope.search_file = [];
@@ -252,10 +269,7 @@ function load_angular(){
             $scope.$apply();
         });
         socket.emit("personal_file", {"cookie": document.cookie});
-        
-        // $scope.lasted_file = [{"headline":"老年","introduction":"架飞机阿咖酚散放辣椒发了卡机发","image":"../images/1.png"},
-        // {"headline":"老年","introduction":"架飞机阿咖酚散放辣椒发了卡机发","image":"../images/2.png"},
-        // {"headline":"老年","introduction":"架飞机阿咖酚散放辣椒发了卡机发","image":"../images/3.png"}];
+
         $scope.$watch('search_value', function(newValue,oldValue){
             if (newValue === oldValue) {
                 return;
@@ -275,37 +289,17 @@ function load_angular(){
     });
 
     app.controller('cooperation_file_controller', function($http,$scope){
-        // $scope.lasted_cooperation_file = [{"h":"老年","p":"架飞机阿咖酚散放辣椒发了卡机发","img":"../images/1.png"},
-        // {"h":"老年","p":"架飞机阿咖酚散放辣椒发了卡机发","img":"../images/2.png"},
-        // {"h":"老年","p":"架飞机阿咖酚散放辣椒发了卡机发","img":"../images/3.png"}];
-
-        // $scope.search_file = [];
-        // $scope.$watch('search_value', function(newValue, oldValue) {
-        //     if (newValue === oldValue) {
-        //         return;
-        //     }else if((newValue.length==1 && oldValue==undefined) || (newValue.length > oldValue.length)){
-        //         $scope.search_file.push({"h":"老年","p":"架飞机阿咖酚散放辣椒发了卡机发","img":"../images/1.png"});
-        //     }else{
-        //         $scope.search_file.pop()
-        //     }
-        // }, true);
-
-        // $scope.labels = [1,2,3,4];
         $scope.search_file = []
         socket.on("cooperation_file", function(msg){
             for(var i=0; i<msg.length; i++){
                 console.log(msg[i]['labels'].toString().split(" "));
                 var labels = msg[i]['labels'].split(' ');
                 msg[i]['labels'] = labels;
-                console.log(labels);
             }
             $scope.lasted_file = msg;    
             $scope.$apply();
         });
         socket.emit("cooperation_file", {"cookie":document.cookie});
-        // $scope.lasted_file = [{"headline":"老年","introduction":"架飞机阿咖酚散放辣椒发了卡机发","image":"../images/1.png"},
-        // {"headline":"老年","introduction":"架飞机阿咖酚散放辣椒发了卡机发","image":"../images/2.png"},
-        // {"headline":"老年","introduction":"架飞机阿咖酚散放辣椒发了卡机发","image":"../images/3.png"}];
         $scope.$watch('search_value', function(newValue,oldValue){
             if (newValue === oldValue) {
                 return;
@@ -414,6 +408,11 @@ function load_angular(){
             $scope.lasted_friend = msg;    
             $scope.$apply();
         });
+
+        socket.on("stranger", function(msg){
+            $scope.search_friend = msg;
+        });
+
         socket.emit("friend_file", {"cookie":document.cookie});
 
         // $scope.lasted_friend = [{'name':'wu','qianming':'be honest','profile':'../images/u_01.png'},
@@ -426,36 +425,12 @@ function load_angular(){
             if (newValue === oldValue) {
                 return;
            }else if((newValue.length==1 && oldValue==undefined) || (newValue.length > oldValue.length)){
-               $scope.search_friend.push({'name':'ze','qianming':'be honest','imageurl':'../images/u_03.png'});
+            socket.emit("stranger", {"cookie":document.cookie});
            }else{
                $scope.search_friend.pop()
            }
         },true);
     });
-   
-    //测试filebox controller
-    // app.controller("file_box_controller", function($http,$scope){
-    //     $scope.labels = [1,2,3,4];
-    //     $scope.search_file = []
-    //     $scope.lasted_file = [{"headline":"老年","introduction":"架飞机阿咖酚散放辣椒发了卡机发","image":"../images/1.png"},
-    //     {"headline":"老年","introduction":"架飞机阿咖酚散放辣椒发了卡机发","image":"../images/2.png"},
-    //     {"headline":"老年","introduction":"架飞机阿咖酚散放辣椒发了卡机发","image":"../images/3.png"}];
-    //     $scope.$watch('old_search_value', function(newValue,oldValue){
-    //         if (newValue === oldValue) {
-    //             return;
-    //        }else if((newValue.length==1 && oldValue==undefined) || (newValue.length > oldValue.length)){
-    //            $scope.old_search_file.push({'h':'ze','p':'be honest','img':'../images/u_03.png'});
-    //        }else{
-    //            $scope.old_search_file.pop()
-    //        }
-    //     },true);
-
-    //     $scope.modify_image = function(){
-    //         console.log("modify_image");
-    //         $scope.$parent.file_box_canvas = [1];
-    //         window.setTimeout(add_canvas,250);
-    //     };
-    // });
 
     app.controller("file_box_controller_01", function($http,$scope){
         $scope.labels = [1,2,3,4,9];
@@ -623,7 +598,7 @@ function load_angular(){
             // console.log("call friend image", tempimage);
             socket.emit("call_friend", {"image":tempimage,"cookie":document.cookie,"email":email});
             socket.emit("send_message",{'email':email,"cookie":document.cookie,"image":tempimage});
-            window.location.href = "/web/draw.html";
+            window.location.href = "/web/draw.html?call=1&email="+email;
             
         }
     });

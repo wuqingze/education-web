@@ -1,0 +1,39 @@
+<html>
+<head><title>Testing</title>
+    <script src="../js/angular.min.js"></script>
+<script type="text/javascript" src="../js/MediaStreamRecorder.js"></script> 
+</head>
+<body>
+<video autoplay="true" id="video"></video>
+<script type="text/javascript">
+var socket = io();
+             window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL;               
+             socket.on("data", function(data){
+                    var binaryData = [];
+                    binaryData.push(data);
+                    videoElement = document.getElementById('video');
+                    videoElement.src = window.URL.createObjectURL(new Blob(binaryData, {type: "video/webm"}));
+            });
+
+                var mediaConstraints = {
+                        video: true
+                    };
+                navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+                    navigator.getUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
+
+                    function onMediaSuccess(stream) {
+                        var arrayOfStreams = [stream];
+                        var medias = new MediaStreamRecorder(stream);
+                        medias.ondataavailable = function(blob) {
+                             socket.emit("send", blob);
+                        };
+                        medias.start();
+                    }
+
+                    function onMediaError(e) {
+                        console.error('media error', e);
+                    }
+</script>
+</body>
+</html> 

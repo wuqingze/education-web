@@ -1,4 +1,3 @@
-console.log("draw angular");
 var socket = io.connect();
 var app = angular.module('draw_app', []);
 app.directive('drawcanvas', function(){
@@ -12,6 +11,17 @@ app.directive('drawcanvas', function(){
 
 app.controller("main_controller", function($http, $scope){
 
+  var loc = location.href;//获取整个跳转地址内容，其实就是你传过来的整个地址字符串
+	console.log("我的地址"+loc);
+	var n1 = loc.length;//地址的总长
+	var n2 = loc.indexOf("?");//取得=号的位置
+	var parameter = decodeURI(loc.substr(n2+1, n1-n2));//截取从?号后面的内容,也就是参数列表，因为传过来的路径是加了码的，所以要解码
+	var parameters  = parameter.split("&");//从&处拆分，返回字符串数组
+  $scope.fromcall = false;
+  if(parameters.length>1){
+    $scope.fromcall = true;
+  }
+  
     $scope.drawhtml = true;
     $scope.image = "";
     $scope.xx = 1;
@@ -36,11 +46,10 @@ app.controller("main_controller", function($http, $scope){
         }
         
     };
-    window.setTimeout(function(){init_canvas($scope);init_video($scope)},1000);
+    //window.setTimeout(function(){init_canvas($scope);init_video($scope)},500);
+    window.setTimeout(function(){init_canvas($scope);},500);
+    init_video($scope);
     $scope.test = function(){
-        // var canvas = $("canvas:first").get(0);
-        // console.log(canvas.getContext("2d"));
-        // console.log($scope.array_data);
         init_canvas($scope);
         init_video($scope);
     }
@@ -63,6 +72,26 @@ app.controller("main_controller", function($http, $scope){
         console.log("height", window.innerHeight);
     }
 
+    $scope.hide_video= function(){
+        if(document.querySelector('#hidevideolink').text == "隐藏"){
+            document.querySelector('#hidevideolink').text = "显示";
+            document.querySelector('#video_panel').style.display = "none"; 
+        }else{
+            document.querySelector('#hidevideolink').text = "隐藏";
+            document.querySelector('#video_panel').style.display = "block"; 
+        }
+    }
+
+    $scope.return_main_page = function(){
+        stop();
+        socket.emit("return_main_page", {"cookie":document.cookie});
+        socket.on("return_main_page",  function(msg){
+            if(msg['result']){
+                window.location.href = "./shouye.html";
+            }
+        });
+    };
+
     $scope.recover = function(){
         $scope.show_navigator = true;
         $scope.show_canvas = true;
@@ -73,6 +102,12 @@ app.controller("main_controller", function($http, $scope){
         $("video:last").get(0).style.width = "300px";
         $("video:last").get(0).style.height = "220px";
     }
+
+    $scope.openvideo = function(){
+        alert("open video");
+        maybeStart();
+    }
+
 
     $scope.icons = function(){
         if($scope.show_icons == true){
@@ -85,22 +120,12 @@ app.controller("main_controller", function($http, $scope){
     $scope.save_empty_file = function(){
       console.log("save empty file",$scope.introduction);
             var canvas = $("canvas:first").get(0);
-            // console.log(canvas.toDataURL());
             socket.emit('save_cooperation_file',{"introduction":$scope.introduction,"headline":$scope.headline,"cookie":document.cookie,"imgData":canvas.toDataURL(),"labels":$scope.labels});
-            // console.log("introduction",$scope.introduction);
-            // console.log("headline",$scope.headline);
-            // console.log("labels",$scope.labels);
             socket.on("save_cooperation_file", function(msg){
                 if(msg['result'] == true){ alert("新文件保存成功")}
+                else alert("新文件保存失败");
             });
     }
-    // $scope.recover = function()
-    // console.log("mymain.js from main_controller");
-    // var canvas = document.getElementsByTagName('canvas')[0];
-    // canvas.id = "main_canvas";
-    // var ctx = canvas.getContext('2d');
-    // var canvas_imagedata = ctx.getImageData(0,0,990,500);
-    // var array_data = new Uint8ClampedArray(canvas_imagedata.data);
 });
 
 
@@ -131,21 +156,8 @@ app.controller('navigator_controller', function($http, $scope) {
 
 
 function init_canvas(scope){
-    console.log("init_canvas");
     var canvas = $("canvas:first").get(0);
-    console.log("scope xx",scope.xx);   
     var img = document.createElement("img");
-    // scope.socket.on("call_friend", function(msg){
-    //   console.log("call_friend----=====---");
-    //   img.src = msg['image'];
-    //   window.setTimeout(function(){$("canvas:first").get(0).getContext('2d').drawImage(img,0,0);},1000);
-    // });
-
-    // img.src = "http://localhost:8080/images/1.png";
-    // window.setTimeout(function(){$("canvas:first").get(0).getContext('2d').drawImage(img,0,0);},1000);
-
-    // img.src = scope.image;
-    // window.setTimeout(function(){$("canvas:first").get(0).getContext('2d').drawImage(img,0,0);},1000);
     scope.socket.emit("call_friend_image",{"xx":"xx"});
     scope.socket.on("call_friend_image", function(msg){
       img.src = msg['image'];
@@ -193,9 +205,9 @@ function init_canvas(scope){
 
 
 function init_video(scope){
-    var isChannelReady = false;
-    var isInitiator = false;
-    var isStarted = false;
+//    var isChannelReady = false;
+//    var isInitiator = false;
+//    var isStarted = false;
     var localStream;
     var pc;
     var remoteStream;
@@ -215,37 +227,6 @@ function init_video(scope){
     
     /////////////////////////////////////////////
     
-    var room = 'foo';
-    // Could prompt for room name:
-    // room = prompt('Enter room name:');
-    
-    // var socket = io.connect();
-    
-    if (room !== '') {
-      scope.socket.emit('create or join', room);
-      console.log('Attempted to create or  join room', room);
-    }
-    
-    scope.socket.on('created', function(room) {
-      console.log('Created room ' + room);
-      isInitiator = true;
-    });
-    
-    scope.socket.on('full', function(room) {
-      console.log('Room ' + room + ' is full');
-    });
-    
-    scope.socket.on('join', function (room){
-      console.log('Another peer made a request to join room ' + room);
-      console.log('This peer is the initiator of room ' + room + '!');
-      isChannelReady = true;
-    });
-    
-    scope.socket.on('joined', function(room) {
-      console.log('joined: ' + room);
-      isChannelReady = true;
-    });
-    
     scope.socket.on('log', function(array) {
       console.log.apply(console, array);
     });
@@ -259,7 +240,6 @@ function init_video(scope){
     
     // This client receives a message
     scope.socket.on('message', function(message) {
-      console.log('Client received message:', message);
       if (message === 'got user media') {
         maybeStart();
       } else if (message.type === 'offer') {
@@ -268,15 +248,15 @@ function init_video(scope){
         }
         pc.setRemoteDescription(new RTCSessionDescription(message));
         doAnswer();
-      } else if (message.type === 'answer' && isStarted) {
+      } else if (message.type === 'answer') {
         pc.setRemoteDescription(new RTCSessionDescription(message));
-      } else if (message.type === 'candidate' && isStarted) {
+      } else if (message.type === 'candidate') {
         var candidate = new RTCIceCandidate({
           sdpMLineIndex: message.label,
           candidate: message.candidate
         });
         pc.addIceCandidate(candidate);
-      } else if (message === 'bye' && isStarted) {
+      } else if (message === 'bye') {
         handleRemoteHangup();
       }
     });
@@ -285,26 +265,43 @@ function init_video(scope){
     
     var localVideo = document.querySelector('#localVideo');
     var remoteVideo = document.querySelector('#remoteVideo');
-    
     navigator.mediaDevices.getUserMedia({
-      audio: false,
+      audio: {
+        mandatory: {
+            echoCancellation: true
+        }
+    },
       video: true
     })
-    .then(gotStream)
+    .then(function(stream){
+      localVideo.srcObject = stream;
+      localVideo.play();
+      var intervalId = null;
+      if(scope.fromcall){
+        intervalId = setInterval(()=>{
+          scope.socket.emit("isvideoready",{"xx":"xx"});
+          scope.socket.on('isvideoready', function(message) {
+            if(message["result"]){
+              remoteVideo.srcObject = stream;
+              remoteVideo.play();
+              clearInterval(intervalId);
+            }
+          });
+        }, 1000);
+      }else{
+        scope.socket.emit("answer",{"xx":"xx"});
+        setTimeout(()=>{
+          remoteVideo.srcObject = stream;
+          remoteVideo.play();
+        },2000);
+      }
+      sendMessage('got user media');
+      maybeStart();
+    })
     .catch(function(e) {
       alert('getUserMedia() error: ' + e.name);
     });
-    function gotStream(stream) {
-      console.log('Adding local stream.');
-        localVideo.srcObject = stream;
-        localVideo.play();
-      localStream = stream;
-      sendMessage('got user media');
-      if (isInitiator) {
-        maybeStart();
-      }
-    }
-    
+
     var constraints = {
       video: true
     };
@@ -318,16 +315,16 @@ function init_video(scope){
     }
     
     function maybeStart() {
-      console.log('>>>>>>> maybeStart() ', isStarted, localStream, isChannelReady);
-      if (!isStarted && typeof localStream !== 'undefined' && isChannelReady) {
+      //if (!isStarted && typeof localStream !== 'undefined' && isChannelReady) {
+      if (typeof localStream !== 'undefined') {
         console.log('>>>>>> creating peer connection');
         createPeerConnection();
         pc.addStream(localStream);
-        isStarted = true;
-        console.log('isInitiator', isInitiator);
-        if (isInitiator) {
-          doCall();
-        }
+        doCall();
+
+//        if (isInitiator) {
+//          doCall();
+//        }
       }
     }
     
@@ -352,7 +349,6 @@ function init_video(scope){
     }
     
     function handleIceCandidate(event) {
-      console.log('icecandidate event: ', event);
       if (event.candidate) {
         sendMessage({
           type: 'candidate',
@@ -363,15 +359,6 @@ function init_video(scope){
       } else {
         console.log('End of candidates.');
       }
-    }
-    
-    function handleRemoteStreamAdded(event) {
-      console.log('Remote stream added.');
-      //remoteVideo.src = window.URL.createObjectURL(event.stream);
-      //remoteStream = event.stream;
-      //remoteVideo.srcObject = event.stream;
-      remoteVideo.srcObject = localStream;
-        remoteVideo.play();
     }
     
     function handleCreateOfferError(event) {
@@ -395,7 +382,6 @@ function init_video(scope){
       // Set Opus as the preferred codec in SDP if Opus is present.
       //  sessionDescription.sdp = preferOpus(sessionDescription.sdp);
       pc.setLocalDescription(sessionDescription);
-      console.log('setLocalAndSendMessage sending message', sessionDescription);
       sendMessage(sessionDescription);
     }
     
@@ -435,8 +421,7 @@ function init_video(scope){
     function handleRemoteStreamAdded(event) {
       console.log('Remote stream added.');
       remoteVideo.srcObject = event.stream;
-        remoteVideo.play();
-//      remoteVideo.src = window.URL.createObjectURL(event.stream);
+      remoteVideo.play();
       remoteStream = event.stream;
     }
     
@@ -453,11 +438,9 @@ function init_video(scope){
     function handleRemoteHangup() {
       console.log('Session terminated.');
       stop();
-      isInitiator = false;
     }
     
     function stop() {
-      isStarted = false;
       // isAudioMuted = false;
       // isVideoMuted = false;
       pc.close();
