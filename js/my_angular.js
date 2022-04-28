@@ -86,6 +86,14 @@ function load_angular(){
         }
     });
 
+    app.directive('modifyuser', function(){
+        return {
+            templateUrl: 'modify_user.html',
+            replace: true,
+            restrict: 'AE',
+        }
+    });
+
     app.controller('new_file_controller', function($scope, $http){
         $scope.add_image_ = false;
         $scope.image_url_ = '';
@@ -635,6 +643,26 @@ function load_angular(){
                     alert("修改头像失败");
                 }
             });
+        }
+    });
+
+    app.controller("modify_user_controller", function($http, $scope){
+        socket.emit("user", {"cookie":document.cookie});
+        socket.on("user", function(msg){
+            $scope.user = msg;
+            $scope.username = msg['username'];
+            $scope.password = msg['password'];
+        });
+
+        socket.on("modifyuser", function(msg){
+            if(msg['result']){
+                alert("修改成功");
+            }else{
+                alert("修改失败");
+            }
+        });
+        $scope.modifyuser = function(){
+            socket.emit("modifyuser",{"username":$scope.username,"password":$scope.password,"cookie":document.cookie});
         }
     });
 

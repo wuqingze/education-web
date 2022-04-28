@@ -545,6 +545,23 @@ var connectedcnt = 0;
 
     });
 
+    socket.on("modifyuser", function(msg){
+      var cookie = msg['cookie'].split(';')[0];
+      var email = login_user[cookie];
+
+      var querysql = "update user set username='"+msg['username']+"' , password='"+msg['password']+"'"+" where email='"+email+"'";
+      console.log(querysql);
+      var connection = mysqlconnection();
+      connection.query(querysql, function(err, rows, fields) {
+          if(err){
+            socket.emit("modifyuser", {"result":false});
+          }else{
+            socket.emit("modifyuser", {"result":true});
+          }
+      });
+
+    });
+
     socket.on("user", function(msg){
       var cookie = msg['cookie'].split(';')[0];
       var email = login_user[cookie];
