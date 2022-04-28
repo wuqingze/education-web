@@ -90,13 +90,13 @@
         // }
         var socket = io.connect(); 
 
-        socket.on("islogin", function(msg){
-            if(!msg['result']){
-                window.location.href = "/";        
-            }
-        });
+        // socket.on("islogin", function(msg){
+        //     if(!msg['result']){
+        //         window.location.href = "/";        
+        //     }
+        // });
 
-        socket.emit("islogin", {"cookie":document.cookie});
+        // socket.emit("islogin", {"cookie":document.cookie});
         load_angular();
 
         var image = '';
