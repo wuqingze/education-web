@@ -480,7 +480,7 @@ var connectedcnt = 0;
                  fs.mkdirSync(dir, { recursive: true });
           }
 
-          connection.query(querysql1,[email+(count+1).toString(), email,friend_email, "../"+imagepath, headline, introduction, labels], function(err, result){
+          connection.query(querysql1,[email+Math.random().toString(), email,friend_email, "../"+imagepath, headline, introduction, labels], function(err, result){
                 if(err){
                   console.log("insert cooperation file failed "+err);
                   socket.emit("save_cooperation_file",{"result":false});
