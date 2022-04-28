@@ -299,12 +299,12 @@ var connectedcnt = 0;
         }else{
           connection.query(querysql, function(err, rows, fields) {
             var row = rows[0];
-            var bin_file_id;
-            if(table == "personal_file"){
-              bin_file_id = row['personal_file_id'];
-            }else{
-              bin_file_id = row['cooperation_file_id'];
-            }
+            var bin_file_id = Math.random().toString();
+            // if(table == "personal_file"){
+            //   bin_file_id = row['personal_file_id'];
+            // }else{
+            //   bin_file_id = row['cooperation_file_id'];
+            // }
             var headline = row['headline'];
             var introduction = row['introduction'];
             var labels = row['labels'];
