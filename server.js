@@ -26,6 +26,7 @@ var app = express();
 // // app.use(express.static('public'));
 app.use("/", express.static(__dirname));
 var bodyParser = require('body-parser');
+const json = require('body-parser/lib/types/json');
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 // var io = socketIO.listen(app);
@@ -549,6 +550,17 @@ var isvideoready = false;
         socket.emit("user", rows[0]) ;
       });
       connection.end();      
+    });
+
+    socket.on("islogin", function(msg){
+      console.log("login user: "+JSON.stringify(login_user));
+      console.log("cookie :"+msg['cookie']);
+      console.log("islogin: "+JSON.stringify(login_user[msg['cookie']]));
+      if(login_user[msg['cookie']] == undefined){
+        socket.emit("islogin",{"result":false});
+      }else{
+        socket.emit("islogin",{"result":true});
+      }
     });
 
     // convenience function to log server messages on the client

@@ -1,6 +1,18 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html lang="en">
-    <script>
+    <!-- <script>
         window.location.href = "/web/login.html";
+    </script> -->
+    <script src="/socket.io/socket.io.js"></script>     
+    <script>
+        var socket = io.connect(); 
+        socket.on("islogin", function(msg){
+            if(!msg['result']){
+                window.location.href = "/web/login.html";        
+            }else{
+                window.location.href = "/web/shouye.html";        
+            }
+        });
+        socket.emit("islogin", {"cookie":document.cookie});
     </script>
 </html>

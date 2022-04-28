@@ -89,6 +89,14 @@
         //     socket.emit("test_cookie",{'cookie':document.cookie});
         // }
         var socket = io.connect(); 
+
+        socket.on("islogin", function(msg){
+            if(!msg['result']){
+                window.location.href = "/";        
+            }
+        });
+
+        socket.emit("islogin", {"cookie":document.cookie});
         load_angular();
 
         var image = '';
@@ -105,5 +113,4 @@
             reader.readAsDataURL(file.files[0]);
         }
     </script>
-    
 </html>
