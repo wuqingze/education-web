@@ -8,7 +8,7 @@ app.directive('drawcanvas', function(){
     }
 });
 
-
+socket.emit("inroom", {});
 app.controller("main_controller", function($http, $scope){
 
   var loc = location.href;//获取整个跳转地址内容，其实就是你传过来的整个地址字符串
@@ -20,6 +20,7 @@ app.controller("main_controller", function($http, $scope){
   $scope.fromcall = false;
   if(parameters.length>1){
     $scope.fromcall = true;
+    $scope.friendemail = parameters[1].split("=")[1];
   }
   
     $scope.drawhtml = true;
@@ -261,10 +262,24 @@ function init_video(scope){
       }
     });
     
+    
     ////////////////////////////////////////////////////
     
     var localVideo = document.querySelector('#localVideo');
     var remoteVideo = document.querySelector('#remoteVideo');
+    var quitInterval;
+
+    scope.socket.on("quit", function(msg){
+      if(msg['result']){
+        remoteVideo.srcObject = null;
+      }
+    });
+
+    quitInterval = setInterval(() => {
+      socket.emit("quit", {});
+    }, 1000);
+
+    quitInterval = window.setInterval(function(){})
     navigator.mediaDevices.getUserMedia({
       audio: {
         mandatory: {
@@ -293,7 +308,7 @@ function init_video(scope){
         setTimeout(()=>{
           remoteVideo.srcObject = stream;
           remoteVideo.play();
-        },2000);
+        },1000);
       }
       sendMessage('got user media');
       maybeStart();
@@ -443,7 +458,7 @@ function init_video(scope){
     function stop() {
       // isAudioMuted = false;
       // isVideoMuted = false;
-      pc.close();
+      //pc.close();
       pc = null;
     }
     

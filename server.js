@@ -51,6 +51,7 @@ var tempimage = "";
 var messages = {};
 var connection_pair = {};
 var isvideoready = false;
+var connectedcnt = 0;
 
   io.on("connection", function(socket){
     connectCounter ++;
@@ -509,6 +510,10 @@ var isvideoready = false;
       isvideoready = true;
     });
 
+    socket.on("inroom", function(msg){
+      connectCounter += 1;
+    });
+
     socket.on("modifyprofile", function(msg){
       var imgData = msg['imagedata'];
       var base64Data = imgData.replace(/^data:image\/\w+;base64,/, "");
@@ -619,7 +624,20 @@ var isvideoready = false;
           var user = login_user[cookie];
           messages[user] = null;
           isvideoready = false;
+          connectedcnt -= 1;
           socket.emit("return_main_page", {"result":true});
+      });
+
+      socket.on("quit", function(msg){
+        if(connectedcnt < 2){
+          socket.emit("quit", {"result":true});
+        }else{
+          socket.emit("quit", {"result":false});
+        }
+      });
+
+      socket.on("inroom", function(msg){
+        connectedcnt += 1;
       });
 
     }); 
