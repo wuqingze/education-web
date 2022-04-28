@@ -12,7 +12,8 @@
                         <a class="back" href="javascript:;">后退</a>
                         <a class="forward" href="javascript:;">前进</a>
                         <a class="clear" href="javascript:;">清除</a>
-                        <a class="save" href="javascript:;" ng-click="save_canvas_file()" data-toggle="modal" data-target="#save_file_model">保存</a>
+                        <a class="save" href="javascript:;" ng-click="save_canvas_file()" ng-show="temp_panel_show" data-toggle="modal" data-target="#save_file_model">修改</a>
+                        <a class="save" href="javascript:;" ng-show="!temp_panel_show" data-toggle="modal" data-target="#save_file_model">保存</a>
                         <a ng-click="only_video()" ng-show="drawhtml">全屏</a>
                         <a ng-click="hide_video()" ng-show="drawhtml" id="hidevideolink">隐藏</a>
                         <a ng-click="return_main_page()" ng-show="drawhtml" >返回</a>

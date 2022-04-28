@@ -55,11 +55,12 @@ app.controller("main_controller", function($http, $scope){
     }
 
     $scope.only_video = function(){
+        document.getElementById("videobox").style.cssText = "";
         $scope.show_navigator = false;
         $scope.show_canvas = false;
         $("video:first").get(0).style.width = "300px";
         $("video:first").get(0).style.height = "200px";
-
+        document.getElementById("localVideo").style="width: 300px; height: 200px;margin-left: 10px;margin-top: 10px;";
         $("video:last").get(0).style.position = "absolute";
         
         $("video:last").get(0).style.width = document.body.offsetWidth.toString()+"px";
@@ -67,9 +68,6 @@ app.controller("main_controller", function($http, $scope){
         $("video:last").get(0).style.top = "10px";
         $("video:last").get(0).style.left = "10px";
         $("video:last").get(0).style.zIndex = "-1";
-        
-        console.log("width",window.innerWidth);
-        console.log("height", window.innerHeight);
     }
 
     $scope.hide_video= function(){
@@ -93,6 +91,8 @@ app.controller("main_controller", function($http, $scope){
     };
 
     $scope.recover = function(){
+        document.getElementById("videobox").style.cssText = "margin-left: 200px;margin-top: 10px;";
+        document.getElementById("localVideo").style="";
         $scope.show_navigator = true;
         $scope.show_canvas = true;
         $("video:last").get(0).style.position = "static";

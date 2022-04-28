@@ -79,6 +79,27 @@ var isvideoready = false;
       connection.end();      
     });
 
+    socket.on("register", function(msg){
+      var connection = mysqlconnection();
+      // var querysql = "select password from user where email='"+msg['email']+"';";
+      var querysql = "select * from user where email='"+msg['email']+"' and password='"+msg['password']+"'";
+      var email = msg['email'];
+      var username = msg['username'];
+      var password = msg['password'];
+      var profile = "../img/u_01.jpg";
+      var querysql = "insert into user(email, password, username, profile) value('"+email+"','"+password+"','"+username+"','"+profile+"');"
+      console.log(querysql);
+      connection.query(querysql,function(err, rows, fields) {    
+        if(err){
+          socket.emit("return_register", false);
+        }else{
+          var cookie = Math.random().toString();
+          login_user[cookie.toString()] = msg['email'];
+          socket.emit("return_register", {"verified":true,"cookie":cookie});
+        }
+      });
+      connection.end();      
+    });
 
     socket.on("personal_file", function(msg){
       var cookie = msg['cookie'].split(';')[0];
@@ -105,8 +126,10 @@ var isvideoready = false;
     });
 
     socket.on("bin_file", function(msg){
+      var cookie = msg['cookie'].split(';')[0];
+      var user = login_user[cookie];
       var connection = mysqlconnection();
-      var querysql = "select * from bin_file where email='nongxiaolang@foxmail.com'";
+      var querysql = "select * from bin_file where email='"+user+"'";
       connection.query(querysql, function(err, rows, fields) {
         socket.emit("bin_file",rows);
         connection.end();
@@ -114,8 +137,10 @@ var isvideoready = false;
     });
 
     socket.on("new_bin_file", function(msg){
+      var cookie = msg['cookie'].split(';')[0];
+      var user = login_user[cookie];
       var connection = mysqlconnection();
-      var querysql = "select * from bin_file where email='nongxiaolang@foxmail.com'";
+      var querysql = "select * from bin_file where email='"+user+"'";
       connection.query(querysql, function(err, rows, fields) {
         socket.emit("new_bin_file",rows);
         connection.end();
@@ -146,11 +171,11 @@ var isvideoready = false;
     });
 
     socket.on("addfriend", function(msg){
-      console.log("addfrind");
+      console.log("addfriend=======");
       var cookie = msg['cookie'].split(';')[0];
       var user = login_user[cookie];
-      var querysql = "se";
-      console.log("add friend "+querysql);
+      var querysql = "insert into friend(email, friend_email) value('"+user+"','"+msg['email']+"');"
+      console.log(querysql);
       var connection = mysqlconnection();
       connection.query(querysql, function(err, rows, fields) {
         if(err){
@@ -158,6 +183,7 @@ var isvideoready = false;
           socket.emit("addfriend",{"result":false});
         }else{
           querysql = "insert into friend(email, friend_email) value('"+msg['email']+"','"+user+"');"
+          console.log(querysql);
           connection.query(querysql, function(err, rows, fields) {
             if(err){
               console.log(err);
@@ -192,19 +218,36 @@ var isvideoready = false;
 
       
       var querysql = "select count(*) from personal_file where email='"+email+"'";
-      var querysql1 = "insert into personal_file(email, personal_file_id, image, headline, introduction, labels) value(?,?,?,?,?,?)";
       var connection = mysqlconnection();
+      console.log(querysql);
       connection.query(querysql, function(err, rows, fields) {
         var count = rows[0]['count(*)'];
         var imagepath = "images/"+email+"/personal_file/"+(count+1).toString()+".png";
-          var dir = "images/"+email+"/personal_file";
+        var dir = "images/"+email+"/personal_file";
         var headline = msg['headline'];
         var introduction = msg['introduction'];
         var labels = msg['labels'];
-        connection.query(querysql1,[email, email+(count+1).toString(),"../"+imagepath, headline, introduction, labels], function(err, result){
-            if (!fs.existsSync(dir)){
-                   fs.mkdirSync(dir, { recursive: true });
-            }
+        var personal_file_id = email+Math.random(1000000).toString();
+
+        querysql = "INSERT INTO `nongwebeducation`.`personal_file` (`email`, `personal_file_id`, `image`, `headline`, `introduction`, `labels`) VALUES ('"
+        +email+"', '"
+        +personal_file_id+"', '"
+        +"../"+imagepath+"', '"
+        +headline+"', '"
+        +introduction+"', '"
+        +labels+"')";
+
+        console.log(querysql);
+        connection.query(querysql,function(err, result){
+          if(err){
+              console.log(err);
+              socket.emit("save_empty_file",{"result":false});
+              return;
+          }
+
+          if (!fs.existsSync(dir)){
+                 fs.mkdirSync(dir, { recursive: true });
+          }
           fs.writeFile(imagepath, dataBuffer, function(err) {
             if(err){
               socket.emit("save_empty_file",{"result":false});
@@ -214,10 +257,9 @@ var isvideoready = false;
               console.log("save successfully");
             }
           });
+          connection.end();
         });
       });
-
-
     });
 
 
@@ -464,6 +506,49 @@ var isvideoready = false;
 
     socket.on("answer", function(msg){
       isvideoready = true;
+    });
+
+    socket.on("modifyprofile", function(msg){
+      var imgData = msg['imagedata'];
+      var base64Data = imgData.replace(/^data:image\/\w+;base64,/, "");
+      var dataBuffer = new Buffer(base64Data, 'base64');
+      
+      var cookie = msg['cookie'].split(';')[0];
+      var email = login_user[cookie];
+
+      var dir = "images/"+email+"/";
+      if (!fs.existsSync(dir)){
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      var imagepath = dir+"profile.jpg";
+      var querysql = "update user set profile='../"+imagepath+"' where email='"+email+"'";
+      console.log(querysql);
+      var connection = mysqlconnection();
+      connection.query(querysql, function(err, rows, fields) {
+          fs.writeFile(imagepath, dataBuffer, function(err) {
+            if(err){
+              socket.emit("modifyprofile",{"result":false});
+              console.log("modify profile failed"+err);
+            }else{
+              socket.emit("modifyprofile",{"result":true});
+              console.log("modify profile successfully");
+            }
+          });
+      });
+
+
+    });
+
+    socket.on("user", function(msg){
+      var cookie = msg['cookie'].split(';')[0];
+      var email = login_user[cookie];
+      var connection = mysqlconnection();
+      var querysql = "select * from user where email='"+email+"'";
+      console.log(querysql);
+      connection.query(querysql,function(err, rows, fields) {   
+        socket.emit("user", rows[0]) ;
+      });
+      connection.end();      
     });
 
     // convenience function to log server messages on the client

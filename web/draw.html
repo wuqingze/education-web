@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>WebRTC</title>
+    <title>Video Panel</title>
     <link rel="stylesheet" href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -42,12 +42,12 @@
     </style>
 </head>
 <body ng-app="draw_app" ng-controller="main_controller">
-    <div ng-include="'navigator.html'" id="navigator_div" ng-show="show_navigator" ng-init="show_navigator = true"></div> 
-    <div class="row clearfix">
+    <!-- <div ng-include="'navigator.html'" id="navigator_div" ng-show="show_navigator" ng-init="show_navigator = true"></div>  -->
+    <div ng-include="'navigator.html'" id="navigator_div" ng-show="false" ng-init="show_navigator = true"></div> 
+    <!-- <div class="row clearfix">
         <div class="col-md-12 column">
             <div class="row clearfix">
                 <div class="col-md-9 column" id="draw_panel" ng-show="show_canvas" ng-init="show_canvas = true">
-                    <!-- <drawcanvas ng-repeat="d in drawcanvas"></drawcanvas> -->
                     <drawcanvas></drawcanvas>
                 </div>
                 <div class="col-md-3 column" id="video_panel">
@@ -61,6 +61,27 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div> -->
+    <div>
+        <div >
+            <div id="draw_panel" ng-show="show_canvas" ng-init="show_canvas = true" >
+                <drawcanvas></drawcanvas>
+            </div>
+        </div>
+        <div id="video_panel">
+            <div>
+                <div style="margin-left: 200px;margin-top: 10px;" id="videobox">
+                    <div style="float: left;">
+                        <video id="localVideo" autoplay muted></video>
+                    </div>
+                    <div>
+                        <video id="remoteVideo" autoplay ng-click="recover()"></video>
+                    </div>
+                </div>
+            </div>
+            
+        </div>            
         </div>
     </div>
     </body>
