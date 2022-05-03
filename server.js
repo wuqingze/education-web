@@ -3,26 +3,9 @@
 var os = require('os');
 var nodeStatic = require('node-static');
 var fs = require('fs');
-// var http = require('http');
-// var socketIO = require('socket.io');
-
-// var fileServer = new(nodeStatic.Server)();
-// var app = http.createServer(function(req, res) {
-//     fileServer.serve(req, res);
-// }).listen(8080);
-
-// var express = require('express');
-// app.use(express.static('public'));
-// app.use("/", express.static(__dirname));
-// var bodyParser = require('body-parser');
-// app.use(bodyParser.urlencoded({extended: false}));
-// app.use(bodyParser.json());
-// var io = socketIO.listen(app);
-
-// var io = socketIO.listen(app_);
-
 var express = require('express');
 var app = express();
+
 // // app.use(express.static('public'));
 app.use("/", express.static(__dirname));
 var bodyParser = require('body-parser');
