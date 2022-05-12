@@ -419,7 +419,7 @@ var connectedcnt = 0;
       }else{
         socket.emit("messages",{'result':false});
       }
-      console.log("message");
+      console.log("messages --- "+JSON.stringify(messages));
     });
 
     socket.on("send_message", function(msg){
